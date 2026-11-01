@@ -28,6 +28,8 @@ This cb-add-on contains:
 | `_sass/_modern.scss` | modern palette, dark palettes, one-row header, item-page layout |
 | `_includes/head/color-mode.html` | sets light/dark before the page is drawn, so a dark page does not flash white |
 | `_includes/color-mode-toggle.html` | the light/dark button in the menu |
+| `_includes/museum-header.html` | the top of every page: menu and title banner, in the order of the look |
+| `_includes/museum-nav.html` | the theme's menu bar, a copy of CB-CSV's `collection-nav.html` with the site name (modern) and the switch, without the small-screen logo |
 | `_layouts/home-museum.html` | optional home page: large search box, example queries, image grid |
 
 ## How To Use
@@ -88,7 +90,9 @@ Check the comments at the top of "_layouts/home-museum.html" for the options (fo
 
 ## Changes to Existing Files
 
-These edits connect the theme to CB-CSV. Each one only adds to the existing template, so the site works as before when the theme is off.
+These edits connect the theme to CB-CSV: a few lines in three files.
+CB-CSV's menu (`_includes/collection-nav.html`) and banner (`_includes/collection-banner.html`) are not edited; the theme uses its own copy of the menu, `_includes/museum-nav.html`.
+To remove the theme, undo these edits. The add-on's files are then no longer used, and can be deleted.
 
 1. `_sass/_custom.scss`, at the end:
 
@@ -103,7 +107,7 @@ These edits connect the theme to CB-CSV. Each one only adds to the existing temp
    {% if site.data.theme.color-mode-toggle %}{% include head/color-mode.html %}{% endif %}
    ```
 
-3. `_layouts/default.html`: put the look on `<html>`, and in the modern look draw the menu above the banner.
+3. `_layouts/default.html`: put the look on `<html>`, and draw the top of the page with the theme's menu.
 
    Replace the first two lines:
 
@@ -130,41 +134,13 @@ These edits connect the theme to CB-CSV. Each one only adds to the existing temp
    with:
 
    ```liquid
-       {% if style == "modern" %}{% include collection-nav.html %}
-       {% include collection-banner.html %}{% else %}{% include collection-banner.html %}
-       {% include collection-nav.html %}{% endif %}
-   ```
-
-4. `_includes/collection-nav.html`: in the modern look the bar also holds the site name, and the switch sits at its right end.
-
-   a. Right before `<nav`, pick the style. The modern bar holds more, so it folds into the menu button below 1200px instead of 992px:
-
-   ```liquid
-   {%- assign style = site.data.theme.theme-style | default: "modern" -%}
-   {%- if style == "modern" %}{% assign bp = "xl" %}{% else %}{% assign bp = "lg" %}{% endif -%}
-   ```
-
-   b. Replace the `<nav ...>` line with this one. It uses that breakpoint, and drops the fixed `data-bs-theme` when the switch is on (otherwise the bar stays light in dark mode):
-
-   ```liquid
-   <nav class="navbar navbar-expand-{{ bp }} {{ site.data.theme.navbar-background | default: 'bg-black' }}"{% unless site.data.theme.color-mode-toggle %} data-bs-theme="{{ site.data.theme.navbar-color | default: 'dark' }}"{% endunless %}>
-   ```
-
-   c. Right after `<div class="container">`, add the site name:
-
-   ```liquid
-   {% if style == "modern" %}<a class="navbar-brand" href="{{ '/' | relative_url }}">{{ site.title }}</a>{% endif %}
-   ```
-
-   and on the mobile logo below it, change `d-lg-none` to `d-{{ bp }}-none`.
-
-   d. Right after `{% include nav-search-lunr.html %}`, add the switch:
-
-   ```liquid
-   {% if site.data.theme.color-mode-toggle %}{% include color-mode-toggle.html %}{% endif %}
+       {% include museum-header.html %}
    ```
 
 If your site is not in English, also change `lang="en"` in step 3 to your language (for example `lang="ja"`). The theme picks its fonts from it.
+
+The menu items still come from `_data/config-nav.csv`, as before.
+If you have changed `_includes/collection-nav.html` yourself, make the same change in `_includes/museum-nav.html`; the same applies when a newer CB-CSV changes its menu.
 
 ## Customize
 
@@ -191,7 +167,7 @@ The same steps work for your own look:
 2. **Put your styles in new files** under `_sass/`, and load them with `@use` at the end of `_sass/_custom.scss`, the file CB-CSV leaves for this. Do not edit `_base.scss` or the other CB-CSV Sass files.
 3. **Hang alternative looks on an attribute.** Write the second look under a selector such as `:root[data-style="modern"]`, and set the attribute from `_data/theme.yml` (step 3 of Changes to Existing Files). For dark mode, use Bootstrap's own `[data-bs-theme="dark"]`.
 4. **Add markup as new includes and layouts**, with names CB-CSV does not use. A new home page is a new layout that the page picks in its front matter, like `home-museum`.
-5. **Keep edits to CB-CSV's templates to single lines** that call your includes, wrapped in an `if` on a `theme.yml` setting. Write them down in your README, as above, so they can be redone on a newer CB-CSV.
+5. **Keep edits to CB-CSV's templates to a few lines** that call your includes. When a whole include has to change, like the menu here, copy it under a new name and change the copy, instead of editing CB-CSV's file. Write the edits down in your README, as above, so they can be redone on a newer CB-CSV.
 
 ## Example
 

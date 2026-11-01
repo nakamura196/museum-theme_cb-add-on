@@ -28,6 +28,8 @@ CollectionBuilder-CSV のアドオン: Museum テーマ
 | `_sass/_modern.scss` | modern の配色、ダークの配色、1 行のヘッダー、資料ページの組み方 |
 | `_includes/head/color-mode.html` | ページを描く前にライト／ダークを決める（ダークのページが一瞬白く光らないように） |
 | `_includes/color-mode-toggle.html` | メニューのライト／ダーク切り替えボタン |
+| `_includes/museum-header.html` | 全ページの上端。メニューとタイトルの帯を、見た目に合った順で出す |
+| `_includes/museum-nav.html` | テーマのメニューの帯。CB-CSV の `collection-nav.html` の写しに、サイト名（modern）と切り替えボタンを足し、狭い画面のロゴを外したもの |
 | `_layouts/home-museum.html` | 任意のトップページ。大きな検索欄、検索語の例、画像の一覧 |
 
 ## 使い方
@@ -88,7 +90,9 @@ search-examples:
 
 ## 既存のファイルへの変更
 
-テーマを CB-CSV につなぐための手入れです。どれも既存のテンプレートに書き足すだけなので、テーマを外せば元どおりに動きます。
+テーマを CB-CSV につなぐための手入れです。3 つのファイルに数行ずつ足します。
+CB-CSV のメニュー（`_includes/collection-nav.html`）とタイトルの帯（`_includes/collection-banner.html`）は直しません。テーマは自前のメニューの写し `_includes/museum-nav.html` を使います。
+テーマを外すときは、この手入れを元に戻してください。アドオンのファイルは使われなくなるので、消してかまいません。
 
 1. `_sass/_custom.scss` の末尾に:
 
@@ -103,7 +107,7 @@ search-examples:
    {% if site.data.theme.color-mode-toggle %}{% include head/color-mode.html %}{% endif %}
    ```
 
-3. `_layouts/default.html`: `<html>` に見た目の名前を付け、modern ではメニューをタイトルの帯の上に出す。
+3. `_layouts/default.html`: `<html>` に見た目の名前を付け、ページの上端をテーマのメニューで描く。
 
    先頭の 2 行
 
@@ -130,41 +134,13 @@ search-examples:
    を次に置き換える:
 
    ```liquid
-       {% if style == "modern" %}{% include collection-nav.html %}
-       {% include collection-banner.html %}{% else %}{% include collection-banner.html %}
-       {% include collection-nav.html %}{% endif %}
-   ```
-
-4. `_includes/collection-nav.html`: modern ではメニューの帯にサイト名も入れ、右端に切り替えボタンを置く。
-
-   a. `<nav` の直前に、見た目を選ぶ 2 行を足す。modern の帯は中身が多いので、992px ではなく 1200px より狭くなったらメニューボタンに畳みます。
-
-   ```liquid
-   {%- assign style = site.data.theme.theme-style | default: "modern" -%}
-   {%- if style == "modern" %}{% assign bp = "xl" %}{% else %}{% assign bp = "lg" %}{% endif -%}
-   ```
-
-   b. `<nav ...>` の行を次の行に置き換える。畳む幅を上の値にし、切り替えボタンを使うときは固定の `data-bs-theme` を外します（外さないと、ダークでもメニューの帯だけ明るいままになります）。
-
-   ```liquid
-   <nav class="navbar navbar-expand-{{ bp }} {{ site.data.theme.navbar-background | default: 'bg-black' }}"{% unless site.data.theme.color-mode-toggle %} data-bs-theme="{{ site.data.theme.navbar-color | default: 'dark' }}"{% endunless %}>
-   ```
-
-   c. `<div class="container">` のすぐ下に、サイト名を足す:
-
-   ```liquid
-   {% if style == "modern" %}<a class="navbar-brand" href="{{ '/' | relative_url }}">{{ site.title }}</a>{% endif %}
-   ```
-
-   その下のスマートフォン用のロゴの `d-lg-none` を `d-{{ bp }}-none` に替える。
-
-   d. `{% include nav-search-lunr.html %}` のすぐ下に、切り替えボタンを足す:
-
-   ```liquid
-   {% if site.data.theme.color-mode-toggle %}{% include color-mode-toggle.html %}{% endif %}
+       {% include museum-header.html %}
    ```
 
 英語以外のサイトでは、手順 3 の `lang="en"` もその言語に替えてください（例: `lang="ja"`）。テーマはこの値でフォントを選びます。
+
+メニューの項目は、これまでどおり `_data/config-nav.csv` から作られます。
+`_includes/collection-nav.html` を自分で直している場合は、同じ直しを `_includes/museum-nav.html` にも入れてください。CB-CSV の新しい版でメニューが変わったときも同じです。
 
 ## 自分好みに直す
 
@@ -190,7 +166,7 @@ search-examples:
 2. **スタイルは `_sass/` の下の新しいファイルに書き**、CB-CSV がこのために空けている `_sass/_custom.scss` の末尾で `@use` する。`_base.scss` など CB-CSV の Sass のファイルは直さない。
 3. **見た目の切り替えは属性に掛ける。** 2 つ目の見た目は `:root[data-style="modern"]` のようなセレクタの下に書き、その属性を `_data/theme.yml` から付ける（「既存のファイルへの変更」の手順 3）。ダークは Bootstrap の `[data-bs-theme="dark"]` を使う。
 4. **HTML を足すときは、新しい include とレイアウトにする。** 名前は CB-CSV が使っていないものにする。新しいトップページは、`home-museum` のように、ページが front matter で選ぶ新しいレイアウトにする。
-5. **CB-CSV のテンプレートへの手入れは、自分の include を呼ぶ 1 行にとどめ**、`theme.yml` の設定の `if` で囲む。手入れは上のように README に書き出しておく。CB-CSV の新しい版でもやり直せるように。
+5. **CB-CSV のテンプレートへの手入れは、自分の include を呼ぶ数行にとどめる。** include を丸ごと変えたいときは、ここでのメニューのように、新しい名前で写してから写しを直す。CB-CSV のファイルは直さない。手入れは上のように README に書き出しておく。CB-CSV の新しい版でもやり直せるように。
 
 ## 使用例
 
