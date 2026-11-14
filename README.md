@@ -26,10 +26,11 @@ This cb-add-on contains:
 | --- | --- |
 | `_sass/_museum.scss` | museum palette (`--museum-*` variables) and component styles |
 | `_sass/_modern.scss` | modern palette, dark palettes, one-row header, item-page layout |
-| `_includes/head/color-mode.html` | sets light/dark before the page is drawn, so a dark page does not flash white |
+| `_includes/head/color-mode.html` | sets light/dark (`data-bs-theme`) and grid/list (`data-view`) before the page is drawn, so a dark page does not flash white |
 | `_includes/color-mode-toggle.html` | the light/dark button in the menu |
 | `_includes/museum-header.html` | the top of every page: menu and title banner, in the order of the look |
 | `_includes/museum-nav.html` | the theme's menu bar, a copy of CB-CSV's `collection-nav.html` with the site name (modern) and the switch, without the small-screen logo |
+| `_includes/view-mode-toggle.html` | the grid/list layout switch for Browse and Search pages |
 | `_layouts/home-museum.html` | optional home page: large search box, example queries, image grid |
 
 ## How To Use
@@ -56,9 +57,15 @@ Jekyll uses a file in your site before the file of the same name in the gem, so 
 In `_data/theme.yml`, add:
 
 ```yaml
-theme-style: modern     # modern / museum
-color-mode-toggle: true # light/dark switch in the menu; false to keep the site light
+theme-style: modern       # modern / museum
+color-mode-toggle: true   # light/dark switch in the menu; false to keep the site light
+view-mode-toggle: true    # grid/list switch on Browse and Search (default: true)
+default-view: grid        # first layout on Browse and Search: grid / list (default: grid)
+thumb-fit: contain        # thumbnails: contain (whole image, default) / cover (cropped to 4:3)
 ```
+
+The last three lines are optional.
+The grid/list switch and `thumb-fit` are set by `_includes/head/color-mode.html`, so they work only with `color-mode-toggle: true`.
 
 For the Latin fonts the theme is designed with (Source Serif 4 / Source Sans 3), set `font-cdn` in the same file:
 
@@ -146,7 +153,7 @@ If you have changed `_includes/collection-nav.html` yourself, make the same chan
 
 Try these in order.
 
-1. **Settings** in `_data/theme.yml`: `theme-style`, `color-mode-toggle`, `font-cdn`.
+1. **Settings** in `_data/theme.yml`: `theme-style`, `color-mode-toggle`, `view-mode-toggle`, `default-view`, `thumb-fit`, `font-cdn`. The grid/list switch is added to Browse and Search automatically; to place it yourself, put `{% include view-mode-toggle.html %}` where you want it.
 2. **Variables** in `_sass/_custom.scss`, after the `@use` lines. Every colour, font and radius is a `--museum-*` variable listed at the top of `_sass/_museum.scss` (light) and `_sass/_modern.scss` (modern and dark). For example:
 
    ```scss

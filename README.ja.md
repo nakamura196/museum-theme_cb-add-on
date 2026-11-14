@@ -26,10 +26,11 @@ CollectionBuilder-CSV のアドオン: Museum テーマ
 | --- | --- |
 | `_sass/_museum.scss` | museum の配色（`--museum-*` の変数）と部品のスタイル |
 | `_sass/_modern.scss` | modern の配色、ダークの配色、1 行のヘッダー、資料ページの組み方 |
-| `_includes/head/color-mode.html` | ページを描く前にライト／ダークを決める（ダークのページが一瞬白く光らないように） |
+| `_includes/head/color-mode.html` | ページを描く前に、ライト／ダークと、格子／リストの表示を決める（ダークのページが一瞬白く光らないように） |
 | `_includes/color-mode-toggle.html` | メニューのライト／ダーク切り替えボタン |
 | `_includes/museum-header.html` | 全ページの上端。メニューとタイトルの帯を、見た目に合った順で出す |
 | `_includes/museum-nav.html` | テーマのメニューの帯。CB-CSV の `collection-nav.html` の写しに、サイト名（modern）と切り替えボタンを足し、狭い画面のロゴを外したもの |
+| `_includes/view-mode-toggle.html` | 一覧と検索のページの、格子／リストの切り替えボタン |
 | `_layouts/home-museum.html` | 任意のトップページ。大きな検索欄、検索語の例、画像の一覧 |
 
 ## 使い方
@@ -56,9 +57,15 @@ Jekyll は、gem の中のファイルより、サイトにある同じ名前の
 `_data/theme.yml` に足す:
 
 ```yaml
-theme-style: modern     # modern / museum
-color-mode-toggle: true # メニューのライト／ダーク切り替え。false でライトのまま
+theme-style: modern       # modern / museum
+color-mode-toggle: true   # メニューのライト／ダーク切り替え。false でライトのまま
+view-mode-toggle: true    # 一覧と検索の、格子／リストの切り替え（既定: true）
+default-view: grid        # 一覧と検索の最初の表示: grid / list（既定: grid）
+thumb-fit: contain        # サムネイル: contain（切り抜かずに全体。既定）/ cover（4:3 に切り抜く）
 ```
+
+後ろの 3 行は任意です。
+格子／リストの切り替えと `thumb-fit` は `_includes/head/color-mode.html` が設定するので、`color-mode-toggle: true` のときだけ効きます。
 
 欧文のフォント（Source Serif 4 / Source Sans 3）を使うときは、同じファイルの `font-cdn` に次を書きます。
 
@@ -146,7 +153,7 @@ CB-CSV のメニュー（`_includes/collection-nav.html`）とタイトルの帯
 
 上から順に試してください。
 
-1. `_data/theme.yml` の**設定**: `theme-style`、`color-mode-toggle`、`font-cdn`。
+1. `_data/theme.yml` の**設定**: `theme-style`、`color-mode-toggle`、`view-mode-toggle`、`default-view`、`thumb-fit`、`font-cdn`。格子／リストの切り替えボタンは、一覧と検索のページに自動で入ります。置く場所を自分で決めるときは、そこに `{% include view-mode-toggle.html %}` を書きます。
 2. `_sass/_custom.scss` の `@use` の行のあとで**変数**を上書きする。色・フォント・角の丸みはすべて `--museum-*` の変数で、一覧は `_sass/_museum.scss`（ライト）と `_sass/_modern.scss`（modern とダーク）の冒頭にあります。例:
 
    ```scss
