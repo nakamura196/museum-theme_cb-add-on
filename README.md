@@ -26,7 +26,7 @@ This cb-add-on contains:
 | --- | --- |
 | `_sass/_museum.scss` | museum palette (`--museum-*` variables) and component styles |
 | `_sass/_modern.scss` | modern palette, dark palettes, one-row header, item-page layout |
-| `_includes/head/color-mode.html` | sets light/dark (`data-bs-theme`) and grid/list (`data-view`) before the page is drawn, so a dark page does not flash white |
+| `_includes/head/color-mode.html` | sets the look (`data-style`), light/dark (`data-bs-theme`) and grid/list (`data-view`) before the page is drawn, so a dark page does not flash white |
 | `_includes/color-mode-toggle.html` | the light/dark button in the menu |
 | `_includes/museum-header.html` | the top of every page: menu and title banner, in the order of the look |
 | `_includes/museum-nav.html` | the theme's menu bar, a copy of CB-CSV's `collection-nav.html` with the site name (modern) and the switch, without the small-screen logo |
@@ -46,7 +46,7 @@ Add to CB-CSV project:
 
 The same files are also packaged as a Jekyll theme gem, [cb-museum-theme](https://github.com/nakamura196/cb-museum-theme). Use it instead of copying if you want to update the theme by changing one version number.
 
-- Add to `Gemfile`: `gem "cb-museum-theme", git: "https://github.com/nakamura196/cb-museum-theme.git", tag: "v0.1.0"`
+- Add to `Gemfile`: `gem "cb-museum-theme", git: "https://github.com/nakamura196/cb-museum-theme.git", tag: "v0.1.1"`
 - Add to `_config.yml`: `theme: cb-museum-theme`
 - Run `bundle install`, then make the same [Changes to Existing Files](#changes-to-existing-files).
 
@@ -65,7 +65,6 @@ thumb-fit: contain        # thumbnails: contain (whole image, default) / cover (
 ```
 
 The last three lines are optional.
-The grid/list switch and `thumb-fit` are set by `_includes/head/color-mode.html`, so they work only with `color-mode-toggle: true`.
 
 For the Latin fonts the theme is designed with (Source Serif 4 / Source Sans 3), set `font-cdn` in the same file:
 
@@ -111,25 +110,10 @@ To remove the theme, undo these edits. The add-on's files are then no longer use
 2. `_includes/head/head.html`, on a new line right after `<meta charset="utf-8">`:
 
    ```liquid
-   {% if site.data.theme.color-mode-toggle %}{% include head/color-mode.html %}{% endif %}
+   {% include head/color-mode.html %}
    ```
 
-3. `_layouts/default.html`: put the look on `<html>`, and draw the top of the page with the theme's menu.
-
-   Replace the first two lines:
-
-   ```liquid
-   <!doctype html>
-   <html lang="en" class="h-100">
-   ```
-
-   with:
-
-   ```liquid
-   {%- assign style = site.data.theme.theme-style | default: "modern" -%}
-   <!doctype html>
-   <html lang="en" class="h-100" data-style="{{ style }}">
-   ```
+3. `_layouts/default.html`: draw the top of the page with the theme's header and menu.
 
    Replace:
 
@@ -144,7 +128,7 @@ To remove the theme, undo these edits. The add-on's files are then no longer use
        {% include museum-header.html %}
    ```
 
-If your site is not in English, also change `lang="en"` in step 3 to your language (for example `lang="ja"`). The theme picks its fonts from it.
+If your site is not in English, set `lang: ja` (or your language code) in `_config.yml`, or change `lang="en"` at the top of `_layouts/default.html`. The theme picks its fonts from `<html lang>`.
 
 The menu items still come from `_data/config-nav.csv`, as before.
 If you have changed `_includes/collection-nav.html` yourself, make the same change in `_includes/museum-nav.html`; the same applies when a newer CB-CSV changes its menu.
@@ -172,7 +156,7 @@ The same steps work for your own look:
 
 1. **Start from Bootstrap's variables.** Bootstrap 5.3 reads its colours, fonts and radii from CSS variables (`--bs-body-bg`, `--bs-primary`, `--bs-border-radius` ...). Set them once in a new Sass file, and every component follows. `_sass/_museum.scss` sets them from a short list of its own variables, so one palette drives the whole site.
 2. **Put your styles in new files** under `_sass/`, and load them with `@use` at the end of `_sass/_custom.scss`, the file CB-CSV leaves for this. Do not edit `_base.scss` or the other CB-CSV Sass files.
-3. **Hang alternative looks on an attribute.** Write the second look under a selector such as `:root[data-style="modern"]`, and set the attribute from `_data/theme.yml` (step 3 of Changes to Existing Files). For dark mode, use Bootstrap's own `[data-bs-theme="dark"]`.
+3. **Hang alternative looks on an attribute.** Write the second look under a selector such as `:root[data-style="modern"]`, and set the attribute from `_data/theme.yml` (`_includes/head/color-mode.html`). For dark mode, use Bootstrap's own `[data-bs-theme="dark"]`.
 4. **Add markup as new includes and layouts**, with names CB-CSV does not use. A new home page is a new layout that the page picks in its front matter, like `home-museum`.
 5. **Keep edits to CB-CSV's templates to a few lines** that call your includes. When a whole include has to change, like the menu here, copy it under a new name and change the copy, instead of editing CB-CSV's file. Write the edits down in your README, as above, so they can be redone on a newer CB-CSV.
 

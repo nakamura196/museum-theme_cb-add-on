@@ -26,7 +26,7 @@ CollectionBuilder-CSV のアドオン: Museum テーマ
 | --- | --- |
 | `_sass/_museum.scss` | museum の配色（`--museum-*` の変数）と部品のスタイル |
 | `_sass/_modern.scss` | modern の配色、ダークの配色、1 行のヘッダー、資料ページの組み方 |
-| `_includes/head/color-mode.html` | ページを描く前に、ライト／ダークと、格子／リストの表示を決める（ダークのページが一瞬白く光らないように） |
+| `_includes/head/color-mode.html` | ページを描く前に、見た目（`data-style`）、ライト／ダーク、格子／リストの表示を決める（ダークのページが一瞬白く光らないように） |
 | `_includes/color-mode-toggle.html` | メニューのライト／ダーク切り替えボタン |
 | `_includes/museum-header.html` | 全ページの上端。メニューとタイトルの帯を、見た目に合った順で出す |
 | `_includes/museum-nav.html` | テーマのメニューの帯。CB-CSV の `collection-nav.html` の写しに、サイト名（modern）と切り替えボタンを足し、狭い画面のロゴを外したもの |
@@ -46,7 +46,7 @@ CB-CSV のプロジェクトに足す:
 
 同じファイルを Jekyll のテーマ gem にしたものが [cb-museum-theme](https://github.com/nakamura196/cb-museum-theme) です。版の番号 1 つでテーマを更新したいときは、コピーの代わりにこちらを使います。
 
-- `Gemfile` に足す: `gem "cb-museum-theme", git: "https://github.com/nakamura196/cb-museum-theme.git", tag: "v0.1.0"`
+- `Gemfile` に足す: `gem "cb-museum-theme", git: "https://github.com/nakamura196/cb-museum-theme.git", tag: "v0.1.1"`
 - `_config.yml` に足す: `theme: cb-museum-theme`
 - `bundle install` のあと、同じく「[既存のファイルへの変更](#既存のファイルへの変更)」を行う。
 
@@ -65,7 +65,6 @@ thumb-fit: contain        # サムネイル: contain（切り抜かずに全体�
 ```
 
 後ろの 3 行は任意です。
-格子／リストの切り替えと `thumb-fit` は `_includes/head/color-mode.html` が設定するので、`color-mode-toggle: true` のときだけ効きます。
 
 欧文のフォント（Source Serif 4 / Source Sans 3）を使うときは、同じファイルの `font-cdn` に次を書きます。
 
@@ -111,25 +110,10 @@ CB-CSV のメニュー（`_includes/collection-nav.html`）とタイトルの帯
 2. `_includes/head/head.html` の `<meta charset="utf-8">` のすぐ下の行に:
 
    ```liquid
-   {% if site.data.theme.color-mode-toggle %}{% include head/color-mode.html %}{% endif %}
+   {% include head/color-mode.html %}
    ```
 
-3. `_layouts/default.html`: `<html>` に見た目の名前を付け、ページの上端をテーマのメニューで描く。
-
-   先頭の 2 行
-
-   ```liquid
-   <!doctype html>
-   <html lang="en" class="h-100">
-   ```
-
-   を次に置き換える:
-
-   ```liquid
-   {%- assign style = site.data.theme.theme-style | default: "modern" -%}
-   <!doctype html>
-   <html lang="en" class="h-100" data-style="{{ style }}">
-   ```
+3. `_layouts/default.html`: ページの上端をテーマのヘッダーとメニューで描く。
 
    次の 2 行
 
@@ -144,7 +128,7 @@ CB-CSV のメニュー（`_includes/collection-nav.html`）とタイトルの帯
        {% include museum-header.html %}
    ```
 
-英語以外のサイトでは、手順 3 の `lang="en"` もその言語に替えてください（例: `lang="ja"`）。テーマはこの値でフォントを選びます。
+英語以外のサイトでは、`_config.yml` に `lang: ja`（またはその言語コード）を足すか、`_layouts/default.html` の先頭にある `lang="en"` をその言語に替えてください。テーマは `<html lang>` の値でフォントを選びます。
 
 メニューの項目は、これまでどおり `_data/config-nav.csv` から作られます。
 `_includes/collection-nav.html` を自分で直している場合は、同じ直しを `_includes/museum-nav.html` にも入れてください。CB-CSV の新しい版でメニューが変わったときも同じです。
@@ -171,7 +155,7 @@ CB-CSV のメニュー（`_includes/collection-nav.html`）とタイトルの帯
 
 1. **Bootstrap の変数から始める。** Bootstrap 5.3 は、色・フォント・角の丸みを CSS 変数（`--bs-body-bg`、`--bs-primary`、`--bs-border-radius` など）から読みます。新しい Sass のファイルで一度設定すれば、すべての部品が従います。`_sass/_museum.scss` は、自前の短い変数の一覧からこれらを設定しているので、1 つの配色でサイト全体が決まります。
 2. **スタイルは `_sass/` の下の新しいファイルに書き**、CB-CSV がこのために空けている `_sass/_custom.scss` の末尾で `@use` する。`_base.scss` など CB-CSV の Sass のファイルは直さない。
-3. **見た目の切り替えは属性に掛ける。** 2 つ目の見た目は `:root[data-style="modern"]` のようなセレクタの下に書き、その属性を `_data/theme.yml` から付ける（「既存のファイルへの変更」の手順 3）。ダークは Bootstrap の `[data-bs-theme="dark"]` を使う。
+3. **見た目の切り替えは属性に掛ける。** 2 つ目の見た目は `:root[data-style="modern"]` のようなセレクタの下に書き、その属性を `_data/theme.yml` から付ける（`_includes/head/color-mode.html`）。ダークは Bootstrap の `[data-bs-theme="dark"]` を使う。
 4. **HTML を足すときは、新しい include とレイアウトにする。** 名前は CB-CSV が使っていないものにする。新しいトップページは、`home-museum` のように、ページが front matter で選ぶ新しいレイアウトにする。
 5. **CB-CSV のテンプレートへの手入れは、自分の include を呼ぶ数行にとどめる。** include を丸ごと変えたいときは、ここでのメニューのように、新しい名前で写してから写しを直す。CB-CSV のファイルは直さない。手入れは上のように README に書き出しておく。CB-CSV の新しい版でもやり直せるように。
 

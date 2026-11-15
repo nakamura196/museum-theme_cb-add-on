@@ -1,10 +1,12 @@
 {%- assign t = site.data.locale[site.lang] -%}
 {%- comment -%}
+    Theme look (`data-style` on <html>), page language (`lang` on <html> when site.lang is set),
     Light / dark colour mode (Bootstrap 5.3 `data-bs-theme` on <html>),
     Grid / List view mode (`data-view` on <html>), and thumbnail fit (`data-thumb-fit`).
     Runs before the stylesheets so a dark page never flashes white
     and browse/search pages render in the visitor's chosen layout immediately.
     Configured in _data/theme.yml:
+      theme-style:       modern | museum (default: modern)
       color-mode-toggle: true | false
       view-mode-toggle:  true | false   (default: true)
       default-view:      grid | list    (default: grid)
@@ -12,7 +14,11 @@
 {%- endcomment -%}
 <script>
 (function () {
-    var key = "cb-color-mode", root = document.documentElement, query = window.matchMedia("(prefers-color-scheme: dark)");
+    var root = document.documentElement;
+    root.setAttribute("data-style", {{ site.data.theme.theme-style | default: "modern" | jsonify }});
+    {% if site.lang %}root.setAttribute("lang", {{ site.lang | jsonify }});{% endif %}
+    {% if site.data.theme.color-mode-toggle %}
+    var key = "cb-color-mode", query = window.matchMedia("(prefers-color-scheme: dark)");
     function saved() { try { return localStorage.getItem(key); } catch (e) { return null; } }
     function apply(mode) { root.setAttribute("data-bs-theme", mode || (query.matches ? "dark" : "light")); }
     apply(saved());
@@ -24,6 +30,7 @@
             apply(mode);
         }
     };
+    {% endif %}
 
     var thumbFit = {{ site.data.theme.thumb-fit | default: "contain" | jsonify }};
     if (thumbFit) { root.setAttribute("data-thumb-fit", thumbFit); }
